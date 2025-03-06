@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"kenzchatapp","appId":"1:420828583048:android:3e5ed654e7ddb1d089bb3d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"kenzchatapp","configurations":{"android":"1:420828583048:android:3e5ed654e7ddb1d089bb3d","ios":"1:420828583048:ios:c9bb33c451be987e89bb3d"}}}}}}

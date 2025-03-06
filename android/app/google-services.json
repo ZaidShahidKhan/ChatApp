@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "420828583048",
+    "project_id": "kenzchatapp",
+    "storage_bucket": "kenzchatapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:420828583048:android:3e5ed654e7ddb1d089bb3d",
+        "android_client_info": {
+          "package_name": "com.example.kenz_chat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5JVL-CTQVHY1sOWUserQh_ZYX80dSzlg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
