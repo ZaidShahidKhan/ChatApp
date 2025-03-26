@@ -55,6 +55,9 @@ dependencies:
   salomon_bottom_bar: ^3.3.2
   stream_chat_flutter: ^9.4.0
   image_picker: ^1.1.2
+  fluttertoast: ^8.2.2
+  percent_indicator: ^4.2.3
+  audioplayers: ^5.0.0
 
 dev_dependencies:
   flutter_test:
@@ -81,6 +84,12 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/bg_dark_blue.jpg
+    - assets/images/bg_dark_blue_grad.jpg
+    - assets/images/bg_ai_gradient.jpg
+    - assets/images/project_creation.jpg
+    - assets/images/success_tick_purple.gif
+    - assets/images/astronaut.gif
+    - assets/sounds/click_sound.mp3
 
 
   fonts:

@@ -1,7 +1,9 @@
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:kenz_chat/features/auth/pending_screen.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'home_screen.dart';
@@ -27,9 +29,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
-
 
 
 class LoginScreen extends StatefulWidget {
@@ -85,11 +84,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   Widget _buildBackgroundWaves() {
     return Opacity(
-      opacity: 0.1,
+      opacity: 1,
       child: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/images/bg_dark_blue.jpg"),
+            image: AssetImage("assets/images/bg_dark_blue_grad.jpg"),
             fit: BoxFit.cover,
           ),
         ),
@@ -121,10 +120,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         width: 400,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          // image: DecorationImage(
-          //   image: AssetImage("assets/images/bg_dark_blue.jpg"),
-          //   fit: BoxFit.cover,
-          // ),
+          image: DecorationImage(
+            image: AssetImage("assets/images/bg_dark_blue_grad.jpg"),
+            fit: BoxFit.cover,
+          ),
           borderRadius: BorderRadius.circular(20),
           color: const Color(0xFF0A1829).withOpacity(0.7),
           boxShadow: [
@@ -180,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         _buildAnimatedLogoIcon(),
         const SizedBox(width: 12),
         const Text(
-          'KENVERSE',
+          'TKENNEKT',
           style: TextStyle(
             color: Colors.white,
             fontSize: 24,
@@ -372,20 +371,64 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Please enter both email and password')),
               );
+              setState(() {
+                isLoading = false;
+              });
               return;
             }
 
-            // Perform authentication with Firebase (or your preferred auth service)
+            // Perform authentication with Firebase
             final UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
               email: email,
               password: password,
             );
 
-            // If successful, navigate to home screen
+            // If authentication successful, check user status in Firestore
             if (userCredential.user != null) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
-              );
+              final String uid = userCredential.user!.uid;
+
+              // Get user data from Firestore
+              final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(uid)
+                  .get();
+
+              if (userDoc.exists) {
+                final userData = userDoc.data() as Map<String, dynamic>;
+                final String? userStatus = userData['status'] as String?;
+                final String? userRole = userData['role'] as String?;
+
+                // Route based on status and role
+                if (userStatus == 'active') {
+                  // User is active, check role
+                  if (userRole == 'admin' || userRole == 'manager') {
+                    // Navigate to HomeScreen for admin/manager
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                    );
+                  } else {
+                    // Navigate to HomeScreen for regular members too (or another screen if needed)
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                    );
+                  }
+                } else {
+                  // User is pending or has another status
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => const PendingScreen()),
+                  );
+                }
+              } else {
+                // If user document doesn't exist in Firestore
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('User profile not found')),
+                );
+
+                // Default to PendingScreen
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const PendingScreen()),
+                );
+              }
             }
           } on FirebaseAuthException catch (e) {
             // Handle specific Firebase auth errors

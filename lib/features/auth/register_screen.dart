@@ -3,9 +3,12 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:kenz_chat/features/auth/auth_service.dart';
 import 'dart:math' as math;
 
 import 'home_screen.dart';
+
+
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -47,7 +50,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
+
       backgroundColor: const Color(0xFF0A1829),
       body: Stack(
         children: [
@@ -103,10 +108,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         width: 400,  // Keep width fixed
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          // image: DecorationImage(
-          //   image: AssetImage("assets/images/bg_dark_blue.jpg"),
-          //   fit: BoxFit.cover,
-          // ),
+          image: DecorationImage(
+            image: AssetImage("assets/images/bg_dark_blue_grad.jpg"),
+            fit: BoxFit.cover,
+          ),
           color: const Color(0xFF0A1829).withOpacity(0.7),
           boxShadow: [
             BoxShadow(
@@ -160,7 +165,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         Padding(
           padding: const EdgeInsets.only(top: 20), // Moves text slightly downward
           child: const Text(
-            'KENVERSE',
+            'TKENNEKT',
             style: TextStyle(
               color: Colors.white,
               fontSize: 23,
@@ -526,7 +531,6 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       ],
     );
   }
-
   Widget _buildRegisterButton() {
     return Container(
       width: double.infinity,
@@ -548,6 +552,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       ),
       child: MaterialButton(
         onPressed: () async {
+          // Always reset the loading state, no matter what happens
+          bool registrationComplete = false;
+
           // Show loading indicator
           setState(() {
             isRegistering = true;
@@ -559,85 +566,49 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             final lastName = lastNameController.text.trim();
             final email = emailController.text.trim();
             final password = passwordController.text.trim();
+            final confirmPassword = confirmPasswordController.text.trim();
 
-            // Validate inputs
-            if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || password.isEmpty) {
+            // Check if passwords match
+            if (password != confirmPassword) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Please fill in all fields')),
+                const SnackBar(content: Text('Passwords do not match')),
               );
               return;
             }
 
-            // Validate email format
-            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Please enter a valid email address')),
-              );
-              return;
-            }
-
-            // Validate password strength (minimum 6 characters)
-            if (password.length < 6) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Password must be at least 6 characters long')),
-              );
-              return;
-            }
-
-            // Create user with email and password
-            final UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            // Use the AuthService to register the user
+            final authService = AuthService();
+            final userCredential = await authService.registerUser(
+              firstName: firstName,
+              lastName: lastName,
               email: email,
               password: password,
+              context: context,
             );
 
-            // If registration successful, save additional user information
-            if (userCredential.user != null) {
-              // Create a user profile in Firestore
-              await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
-                'firstName': firstName,
-                'lastName': lastName,
-                'email': email,
-                'createdAt': FieldValue.serverTimestamp(),
-              });
-
-              // Update user display name
-              await userCredential.user!.updateDisplayName('$firstName $lastName');
-
-              // Show success message
+            if (userCredential != null) {
+              registrationComplete = true;
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Account created successfully!')),
-              );
-
-              // Navigate to home screen or login screen
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
+                const SnackBar(content: Text('Account created successfully! Please log in.')),
               );
             }
-          } on FirebaseAuthException catch (e) {
-            // Handle specific Firebase auth errors
-            String errorMessage = 'Registration failed';
-
-            if (e.code == 'weak-password') {
-              errorMessage = 'The password provided is too weak';
-            } else if (e.code == 'email-already-in-use') {
-              errorMessage = 'An account already exists for this email';
-            } else if (e.code == 'invalid-email') {
-              errorMessage = 'Invalid email format';
-            }
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(errorMessage)),
-            );
           } catch (e) {
-            // Handle other exceptions
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Registration failed: ${e.toString()}')),
+              SnackBar(content: Text("Registration error: $e")),
             );
           } finally {
-            // Hide loading indicator
-            setState(() {
-              isRegistering = false;
-            });
+            // ALWAYS reset the loading state
+            if (mounted) {
+              setState(() {
+                isRegistering = false;
+              });
+
+              // If registration was successful, go back to login
+              if (registrationComplete) {
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context).pop();
+              }
+            }
           }
         },
         shape: RoundedRectangleBorder(

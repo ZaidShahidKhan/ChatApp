@@ -12,6 +12,12 @@ abstract class AppColors {
   static const textHighlight = secondary;
   static const cardLight = Color(0xFFF9FAFE);
   static const cardDark = Color(0xFF303334);
+
+  static const zinc_one= Color(0xFF18181B); // zinc-950
+  static const zinc_two= Color(0xFF27272A); // zinc-900
+  static const indigo= Color(0xFF4F46E5); // indigo-600
+  static const zinc_four= Color(0xFFF4F4F5); // zinc-100
+  static const zinc_three= Color(0xFFA1A1AA); // zinc-400
 }
 
 // abstract class _LightColors {

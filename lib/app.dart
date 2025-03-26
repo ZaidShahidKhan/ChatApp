@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'features/auth/login_screen.dart';
 import 'features/auth/home_screen.dart';
+import 'features/auth/user_status_router.dart';
 
 class ChatApp extends StatelessWidget {
 
@@ -15,6 +16,7 @@ class ChatApp extends StatelessWidget {
       title: 'Flutter Chat App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+
         primarySwatch: Colors.blue,
         brightness: Brightness.light,
         useMaterial3: true,
@@ -47,7 +49,7 @@ class ChatApp extends StatelessWidget {
 
           // Check if user is logged in
           if (snapshot.hasData) {
-            return const HomeScreen();
+            return UserStatusRouter();
           } else {
             return const LoginScreen();
           }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'firebase_options.dart';
+
 
 import 'app.dart';
 
@@ -18,9 +20,9 @@ void main() async {
   ]);
 
 
-  // Initialize Firebase
-  await Firebase.initializeApp();
-
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   // Run the app
   runApp(const ChatApp());
 }
