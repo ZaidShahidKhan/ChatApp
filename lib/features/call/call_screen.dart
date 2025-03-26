@@ -6,6 +6,7 @@ class CallScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFF18181B),
       appBar: AppBar(title: const Text('Calls')),
       body: const Center(child: Text('Call Screen')),
     );
